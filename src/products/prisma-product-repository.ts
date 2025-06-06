@@ -47,9 +47,60 @@ export class PrismaProductRepository implements ProductRepository {
                 page: pageable.page,
                 size: pageable.size,
                 total,
-                lastPage: Math.ceil(total / pageable.size),
+                lastPage: total == 0 ? 1 : Math.ceil(total / pageable.size),
             },
         };
 
     }
+
+    async create(name: string, price: number, quantity: number, description?: string): Promise<Object> {
+
+        const data: any = {
+            name,
+            price,
+            quantity,
+        };
+
+        if (description !== undefined) {
+            data.description = description;
+        }
+
+        const product = await this.prisma.product.create({
+            data,
+        });
+
+        return product;
+    }
+
+    async update(id: string, name?: string, price?: number, quantity?: number, description?: string): Promise<Object> {
+        
+        const updateData = {
+            ...(name !== undefined && { name }),
+            ...(price !== undefined && { price }),
+            ...(quantity !== undefined && { quantity }),
+            ...(description !== undefined && { description }),
+        };
+
+        const product = await this.prisma.product.update({
+            data: {
+                ...updateData
+            },
+            where: {
+                id
+            }
+        });
+
+        return product;
+    }
+
+    async delete(id: string): Promise<void>
+    {   
+        await this.prisma.product.delete({
+            where: {
+                id
+            }
+        })
+    }
+
+
 }   
